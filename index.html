@@ -1,0 +1,171 @@
+<!doctype html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+	  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	  <title>Scrolling Ticker</title>
+ 		<link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/3.0.0/build/cssfonts/fonts-min.css">
+		<link rel="stylesheet" href="http://yui.yahooapis.com/3.0.0/build/cssreset/reset.css" type="text/css">
+		<link rel="stylesheet" type="text/css" href="css/global.css"/>
+	</head>
+	<body class=" yui-skin-sam">
+	  <div id="tickerContainer">&nbsp;</div>
+		<br />
+		<div id="controls">
+			<input id="radioOn" type="radio" name="run" value="on" checked="checked" /><label for="radioOn"> Run Ticker</label>
+			<br /><br />
+			<input id="radioOff" type="radio" name="run" value="off" /><label for="radioOff"> Stop Ticker</label>
+			<br /><br />
+			<button class="btnReset">Reset</button>
+			<br /><br />
+			<input id="delayTimer" type="text" name="delayTimer" value="15" /><label for="delayTimer"> Rotation Speed ('standard' value is 50 ... lower numbers rotate faster)</label>
+		</div>
+		<br /><br />
+		<div align="center">
+			<input id="quickList" type="text" /><label for="quickList"> Quick List</label>
+		</div>
+		<br />
+		<div align="center" id="identityContainer">
+			Streaming quote data provided by 
+			<span id="identity">&nbsp;</span>
+		</div>
+		<div class="supportDataWrapper hidden">
+			<h1><a href="#" title="Click to hide/show">Support Data <span class="arrowImg">&nbsp;</span> </a></h1>
+			<div class="supportData">
+				<div class="stockListContainer">
+					<h2>Watched Symbols List</h2>
+					<ul class="stockList">
+						<li class="stockListLine">
+							<div class="listSym">
+								NGmyy.NYM
+							</div>
+							<div class="listDesc">
+								Natural Gas Futures
+							</div>
+						</li>
+						<li class="stockListLine">
+							<div class="listSym">
+								6Jmyy.CME
+							</div>
+							<div class="listDesc">
+								Japanese Yen Futures
+							</div>
+						</li>
+						<li class="stockListLine">
+							<div class="listSym">
+								OJmyy.NYB
+							</div>
+							<div class="listDesc">
+								Orange Juice Futures
+							</div>
+						</li>
+					</ul>
+				</div>
+				<div class="monthCodes">
+					<h2>Futures Contract Month Codes</h2>
+					
+					<ul class="monthList">
+						<li>
+							<div class="monthName">
+								January
+							</div>
+							<div class="monthCode">
+								F
+							</div>
+						</li>
+						<li>
+							<div class="monthName">
+								February
+							</div>
+							<div class="monthCode">
+								G
+							</div>
+						</li>
+						<li>
+							<div class="monthName">
+								March
+							</div>
+							<div class="monthCode">
+								H
+							</div>
+						</li>
+						<li>
+							<div class="monthName">
+								April
+							</div>
+							<div class="monthCode">
+								J
+							</div>
+						</li>
+						<li>
+							<div class="monthName">
+								May
+							</div>
+							<div class="monthCode">
+								K
+							</div>
+						</li>
+						<li>
+							<div class="monthName">
+								June
+							</div>
+							<div class="monthCode">
+								M
+							</div>
+						</li>
+						<li>
+							<div class="monthName">
+								July
+							</div>
+							<div class="monthCode">
+								N
+							</div>
+						</li>
+						<li>
+							<div class="monthName">
+								August
+							</div>
+							<div class="monthCode">
+								Q
+							</div>
+						</li>
+						<li>
+							<div class="monthName">
+								September
+							</div>
+							<div class="monthCode">
+								U
+							</div>
+						</li>
+						<li>
+							<div class="monthName">
+								October
+							</div>
+							<div class="monthCode">
+								V
+							</div>
+						</li>
+						<li>
+							<div class="monthName">
+								November
+							</div>
+							<div class="monthCode">
+								X
+							</div>
+						</li>
+						<li>
+							<div class="monthName">
+								December
+							</div>
+							<div class="monthCode">
+								Z
+							</div>
+						</li>
+					</ul> 
+				</div>
+			</div>
+		</div>
+		<script type="text/javascript" src="http://yui.yahooapis.com/3.0.0/build/yui/yui-debug.js"></script>
+		<script type="text/javascript" src="http://yui.yahooapis.com/2.8.0/build/yahoo-dom-event/yahoo-dom-event.js"></script> 
+		<script src="js/main.js"></script>
+	</body>
+</html>
