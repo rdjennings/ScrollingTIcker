@@ -38,8 +38,11 @@ YUI({combine: true, timeout: 10000, filter:"debug", logInclude: {example:true}})
 					e.preventDefault();
 				})
 				Y.one('.btnReset').on('click', function(e) {
-					Y.one('#tickerContainer').set('innerHTML', '')
-					_self.loadTickerData()
+					Y.one('#tickerContainer').set('innerHTML', '');
+					setTimeout(function() {
+						Y.one('#tickerContainer').set('innerHTML', '');
+						_self.loadTickerData()
+					}, 500)
 				})
 			},
 			loadSymbols : function() {
@@ -125,6 +128,9 @@ YUI({combine: true, timeout: 10000, filter:"debug", logInclude: {example:true}})
 					if ((stocks[i]['change'] + '').indexOf('-') > -1) {
 						tickerLine += '<img src="img/spacer.png" alt="" class="dirArrow down" />';
 						posNeg = 'negative';
+					} else if (stocks[i]['change'] * 1 === 0) {
+						tickerLine += '<img src="img/spacer.png" alt="" class="dirArrow" />';
+						posNeg = '';
 					} else {
 						tickerLine += '<img src="img/spacer.png" alt="" class="dirArrow up" />';
 						posNeg = 'positive';
