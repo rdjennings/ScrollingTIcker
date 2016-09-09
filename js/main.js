@@ -105,6 +105,7 @@ YUI({combine: true, timeout: 10000, filter:"debug", logInclude: {example:true}})
 			buildTicker : function(oData){
 				var data = Y.JSON.parse(oData.replace(this.rExp, ''));
 				var stocks = Y.DataSchema.JSON.apply(this.schema, data).results;
+				var spreadOnly = document.getElementById('spreadOnly').checked;
 				tickerLine = '';
 				var stockCnt = stocks.length;
 				var numBid, numAsk, spread;
@@ -125,32 +126,36 @@ YUI({combine: true, timeout: 10000, filter:"debug", logInclude: {example:true}})
 					tickerLine += stocks[i]['name'] + ' (';
 					tickerLine += stocks[i]["symbol"] + ') ';
 					tickerLine += stocks[i]['price'] + ' ';
-					if ((stocks[i]['change'] + '').indexOf('-') > -1) {
-						tickerLine += '<img src="img/spacer.png" alt="" class="dirArrow down" />';
-						posNeg = 'negative';
-					} else if (stocks[i]['change'] * 1 === 0) {
-						tickerLine += '<img src="img/spacer.png" alt="" class="dirArrow" />';
-						posNeg = '';
-					} else {
-						tickerLine += '<img src="img/spacer.png" alt="" class="dirArrow up" />';
-						posNeg = 'positive';
+					if (!spreadOnly) {
+						if ((stocks[i]['change'] + '').indexOf('-') > -1) {
+							tickerLine += '<img src="img/spacer.png" alt="" class="dirArrow down" />';
+							posNeg = 'negative';
+						} else if (stocks[i]['change'] * 1 === 0) {
+							tickerLine += '<img src="img/spacer.png" alt="" class="dirArrow" />';
+							posNeg = '';
+						} else {
+							tickerLine += '<img src="img/spacer.png" alt="" class="dirArrow up" />';
+							posNeg = 'positive';
+						}
+						tickerLine += '<span class="' + posNeg + '">' + (stocks[i]['change'] + '').replace(/\-|\+/,"") + '</span> ';
+	//					tickerLine += 'BkV: ' + stocks[i]['BkV'] + '&nbsp;&nbsp;&nbsp;';
+	/*					if ((stocks[i]['chg'] + '').indexOf('-') > -1) {
+							posNeg = 'negative';
+						} else {
+							posNeg = 'positive';
+						}
+	*/
+	//					tickerLine += '(&#916;50 day: <span class="' + posNeg + '">' + stocks[i]['chg'] + '</span>)&nbsp;&nbsp;&nbsp;';
+						tickerLine += 'Bid: ' + stocks[i]['bid'] + '&nbsp;&nbsp;&nbsp;'
+						tickerLine += 'Ask: ' + stocks[i]['ask'] + '&nbsp;&nbsp;&nbsp;'
 					}
-					tickerLine += '<span class="' + posNeg + '">' + (stocks[i]['change'] + '').replace(/\-|\+/,"") + '</span> ';
-//					tickerLine += 'BkV: ' + stocks[i]['BkV'] + '&nbsp;&nbsp;&nbsp;';
-/*					if ((stocks[i]['chg'] + '').indexOf('-') > -1) {
-						posNeg = 'negative';
-					} else {
-						posNeg = 'positive';
-					}
-*/
-//					tickerLine += '(&#916;50 day: <span class="' + posNeg + '">' + stocks[i]['chg'] + '</span>)&nbsp;&nbsp;&nbsp;';
-					tickerLine += 'Bid: ' + stocks[i]['bid'] + '&nbsp;&nbsp;&nbsp;'
-					tickerLine += 'Ask: ' + stocks[i]['ask'] + '&nbsp;&nbsp;&nbsp;'
 					tickerLine += 'Spread: ' + spread + '&nbsp;&nbsp;&nbsp;'
-					tickerLine += 'Avg Dly Vol: ' + stocks[i]['adv'].replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,") + '&nbsp;&nbsp;&nbsp;'
-					tickerLine += 'Prev Close: ' + stocks[i]['prvClose'] + '&nbsp;&nbsp;&nbsp;'
-					tickerLine += 'DLY: ' + (this.delayTable[stocks[i]['exchange']] || 'UNKN') + '&nbsp;&nbsp;&nbsp;'
+					if (!spreadOnly) {
+						tickerLine += 'Avg Dly Vol: ' + stocks[i]['adv'].replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,") + '&nbsp;&nbsp;&nbsp;'
+						tickerLine += 'Prev Close: ' + stocks[i]['prvClose'] + '&nbsp;&nbsp;&nbsp;'
+						tickerLine += 'DLY: ' + (this.delayTable[stocks[i]['exchange']] || 'UNKN') + '&nbsp;&nbsp;&nbsp;'
 					}
+				}
 				tickerLine += ' ...  ...  ';
 				
 				var tickerLineLen = tickerLine.length;
