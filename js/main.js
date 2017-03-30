@@ -7,7 +7,7 @@ YUI({combine: true, timeout: 10000, filter:"debug", logInclude: {example:true}})
 				metaFields: {source:"source"},
 				resultListLocator: "records",
 //				resultFields: [{key:"symbol"}, {key:"name"}, {key:"price"}, {key:"change"}] // Or simply: ["symbol", "name", "price", "change"]
-				resultFields: ["symbol", "name", "price", "change", "chg", "BkV", "bid", "ask", "adv", "prvClose", "exchange"] // Or [{key:"symbol"}, {key:"name"}, {key:"price"}, {key:"change"}]
+				resultFields: ["symbol", "name", "price", "change", "chg", "BkV", "bid", "ask", "adv", "prvClose", "exchange", "open"] // Or [{key:"symbol"}, {key:"name"}, {key:"price"}, {key:"change"}]
 			},
 			delayTable: {
 				'CME': '10min',
@@ -41,6 +41,7 @@ YUI({combine: true, timeout: 10000, filter:"debug", logInclude: {example:true}})
 					Y.one('#tickerContainer').set('innerHTML', '');
 					setTimeout(function() {
 						Y.one('#tickerContainer').set('innerHTML', '');
+						Y.one('#radioOn').set('checked', 'checked');
 						_self.loadTickerData()
 					}, 500)
 				})
@@ -105,10 +106,9 @@ YUI({combine: true, timeout: 10000, filter:"debug", logInclude: {example:true}})
 			buildTicker : function(oData){
 				var data = Y.JSON.parse(oData.replace(this.rExp, ''));
 				var stocks = Y.DataSchema.JSON.apply(this.schema, data).results;
-				var spreadOnly = document.getElementById('spreadOnly').checked;
 				tickerLine = '';
 				var stockCnt = stocks.length;
-				var numBid, numAsk, spread;
+				var numBid, numAsk, spread, spreadClass;
 				for (var i = 0; i < stockCnt; i++) {
 					// YAHOO is sending back a blank/empty line from time to time
 					if (stocks[i]['symbol'] == '') {
@@ -123,10 +123,28 @@ YUI({combine: true, timeout: 10000, filter:"debug", logInclude: {example:true}})
 						spread = (Math.round((Math.abs(numBid - numAsk)) * 1000))/1000
 					}
 					
-					tickerLine += stocks[i]['name'] + ' (';
-					tickerLine += stocks[i]["symbol"] + ') ';
-					tickerLine += stocks[i]['price'] + ' ';
-					if (!spreadOnly) {
+					if (!isNaN(spread) && spread <= .03) {
+						spreadClass = 'spreadBold';
+					} else {
+						spreadClass = 'spreadDim'
+					}
+					tickerLine += '<span class=' + spreadClass + '>'
+
+					if (document.getElementById('cbxName').checked) {
+						tickerLine += stocks[i]['name'] + ' (';
+					}
+					tickerLine += stocks[i]["symbol"];
+					if (document.getElementById('cbxName').checked) {
+						tickerLine += ')';
+					}
+					tickerLine += ' ';
+					if (document.getElementById('cbxPrice').checked) {
+						tickerLine += stocks[i]['price'] + ' ';
+					}
+					if (document.getElementById('cbxOpen').checked) {
+						tickerLine += 'Open: ' + stocks[i]['open'] + '&nbsp;&nbsp;&nbsp;'
+					}
+					if (document.getElementById('cbxChange').checked) {
 						if ((stocks[i]['change'] + '').indexOf('-') > -1) {
 							tickerLine += '<img src="img/spacer.png" alt="" class="dirArrow down" />';
 							posNeg = 'negative';
@@ -138,23 +156,37 @@ YUI({combine: true, timeout: 10000, filter:"debug", logInclude: {example:true}})
 							posNeg = 'positive';
 						}
 						tickerLine += '<span class="' + posNeg + '">' + (stocks[i]['change'] + '').replace(/\-|\+/,"") + '</span> ';
-	//					tickerLine += 'BkV: ' + stocks[i]['BkV'] + '&nbsp;&nbsp;&nbsp;';
-	/*					if ((stocks[i]['chg'] + '').indexOf('-') > -1) {
+					}
+					if (document.getElementById('cbxBook').checked) {
+						tickerLine += 'BkV: ' + stocks[i]['BkV'] + '&nbsp;&nbsp;&nbsp;';
+						if ((stocks[i]['chg'] + '').indexOf('-') > -1) {
 							posNeg = 'negative';
 						} else {
 							posNeg = 'positive';
 						}
-	*/
-	//					tickerLine += '(&#916;50 day: <span class="' + posNeg + '">' + stocks[i]['chg'] + '</span>)&nbsp;&nbsp;&nbsp;';
+						tickerLine += '(&#916;50 day: <span class="' + posNeg + '">' + stocks[i]['chg'] + '</span>)&nbsp;&nbsp;&nbsp;';
+					}
+					if (document.getElementById('cbxBid').checked) {
 						tickerLine += 'Bid: ' + stocks[i]['bid'] + '&nbsp;&nbsp;&nbsp;'
+					}
+					if (document.getElementById('cbxAsk').checked) {
 						tickerLine += 'Ask: ' + stocks[i]['ask'] + '&nbsp;&nbsp;&nbsp;'
 					}
-					tickerLine += 'Spread: ' + spread + '&nbsp;&nbsp;&nbsp;'
-					if (!spreadOnly) {
+					if (document.getElementById('cbxSpread').checked) {
+						tickerLine += 'Spread: ' + spread + '&nbsp;&nbsp;&nbsp;'
+					}
+					if (document.getElementById('cbxVol').checked) {
 						tickerLine += 'Avg Dly Vol: ' + stocks[i]['adv'].replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,") + '&nbsp;&nbsp;&nbsp;'
+					}
+					if (document.getElementById('cbxPrevClose').checked) {
 						tickerLine += 'Prev Close: ' + stocks[i]['prvClose'] + '&nbsp;&nbsp;&nbsp;'
+					}
+					if (document.getElementById('cbxDelay').checked) {
 						tickerLine += 'DLY: ' + (this.delayTable[stocks[i]['exchange']] || 'UNKN') + '&nbsp;&nbsp;&nbsp;'
 					}
+
+					tickerLine += '</span>'
+
 				}
 				tickerLine += ' ...  ...  ';
 				
@@ -169,7 +201,7 @@ YUI({combine: true, timeout: 10000, filter:"debug", logInclude: {example:true}})
 			},
 			scrollTicker : function() {
 				// have to check for the checked input element since IE does not support the :checked construct
-				var checks = Y.all('#controls input');
+				var checks = Y.all('#controls input[type="radio"]');
 				var checkVal = '';
 				checks.each(function(oItem){
 					if(oItem.get('checked')) {

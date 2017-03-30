@@ -11,15 +11,62 @@
 	  <div id="tickerContainer">&nbsp;</div>
 		<br />
 		<div id="controls">
-			<input id="radioOn" type="radio" name="run" value="on" checked="checked" /><label for="radioOn"> Run Ticker</label>
+			<div id="contentControls">
+				<div id="motionControls">
+					<div class="headline">Run/Stop</div>
+					<div class="controls">
+						<input id="radioOn" type="radio" name="run" value="on" checked="checked" /><label for="radioOn"> Run Ticker</label>
+						<br /><br />
+						<input id="radioOff" type="radio" name="run" value="off" /><label for="radioOff"> Stop Ticker</label>
+					</div>
+				</div>
+				<div id="fieldControls">
+					<div class="headline">Select Fields</div>
+					<ul>
+						<li>
+							<input id="cbxName" type="checkbox" checked="checked" /><label for="cbxName">Name</label>
+						</li>
+						<li>
+							<input id="cbxPrice" type="checkbox" checked="checked" /><label for="cbxPrice">Price</label>
+						</li>
+						<li>
+							<input id="cbxOpen" type="checkbox" /><label for="cbxDelay">Open</label>
+						</li>
+						<li>
+							<input id="cbxChange" type="checkbox" /><label for="cbxChange">Change</label>
+						</li>
+						<li>
+							<input id="cbxBook" type="checkbox" /><label for="cbxBook">Book Value</label>
+						</li>
+					</ul>
+					<ul>
+						<li>
+							<input id="cbxBid" type="checkbox" checked="checked" /><label for="cbxBid">Bid</label>
+						</li>
+						<li>
+							<input id="cbxAsk" type="checkbox" checked="checked" /><label for="cbxAsk">Ask</label>
+						</li>
+						<li>
+							<input id="cbxSpread" type="checkbox" checked="checked" /><label for="cbxSpread">Spread</label>
+						</li>
+						<li>
+							<input id="cbxVol" type="checkbox" /><label for="cbxVol">Avg. Daily Volume</label>
+						</li>
+						<li>
+							<input id="cbxPrevClose" type="checkbox" /><label for="cbxPrevClose">Previous Close</label>
+						</li>
+						<li>
+							<input id="cbxDelay" type="checkbox" checked="checked" /><label for="cbxDelay">Delay</label>
+						</li>
+					</ul>
+				</div>
+			</div>
 			<br /><br />
-			<input id="radioOff" type="radio" name="run" value="off" /><label for="radioOff"> Stop Ticker</label>
-			<br /><br />
-			<input id="spreadOnly" type="checkbox" name="spread" /><label for="spreadOnly"> Spread Only</label>
-			<br /><br />
-			<button class="btnReset">Reset</button>
-			<br /><br />
-			<input id="delayTimer" type="text" name="delayTimer" value="15" /><label for="delayTimer"> Rotation Speed ('standard' value is 50 ... lower numbers rotate faster)</label>
+			<div id="globalControls">
+				<button class="btnReset">Reset</button>
+				<br /><br />
+				<input id="delayTimer" type="text" name="delayTimer" value="15" /><label for="delayTimer"> Rotation Speed ('standard' value is 50 ... lower numbers rotate faster)</label>
+			</div>
 		</div>
 		<br /><br />
 		<div align="center">
