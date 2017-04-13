@@ -236,8 +236,11 @@ h2 {
 	opacity: 1;
 }
 
+.spreadGold {
+	color: #FFD700;
+}
+
 .spreadDim {
 	opacity: .7;
 }
-
 

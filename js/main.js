@@ -125,6 +125,8 @@ YUI({combine: true, timeout: 10000, filter:"debug", logInclude: {example:true}})
 					
 					if (!isNaN(spread) && spread <= .03) {
 						spreadClass = 'spreadBold';
+					} else if (isNaN(spread)) {
+						spreadClass = 'spreadGold';
 					} else {
 						spreadClass = 'spreadDim'
 					}
