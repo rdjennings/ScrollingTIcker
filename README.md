@@ -1,1 +1,1 @@
-README.md
+Scrolling ticker for stock exchange data
