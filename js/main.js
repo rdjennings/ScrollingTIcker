@@ -1,17 +1,20 @@
+var onDemand = new OnDemandClient();
+
+onDemand.setAPIKey('5e79ce1f973947fbec691fabf25386c0');
+onDemand.setJsonP(true);
+onDemand.setBaseUrl ('https://marketdata.websol.barchart.com')
+var symbols = 'G,DVN'
+var fields = 'bid,ask,volume,previousClose,avgVolume'
+
 YUI({combine: true, timeout: 10000, filter:"debug", logInclude: {example:true}}).use('node','io','json', 'dataschema-json',
 	function(Y){
 		var tickerApp = {
 			tryCount : 0,
-			rExp: /<b>|<\/b>/g,
-			schema : {
-				metaFields: {source:"source"},
-				resultListLocator: "records",
-//				resultFields: [{key:"symbol"}, {key:"name"}, {key:"price"}, {key:"change"}] // Or simply: ["symbol", "name", "price", "change"]
-				resultFields: ["symbol", "name", "price", "change", "chg", "BkV", "bid", "ask", "adv", "prvClose", "exchange", "open"] // Or [{key:"symbol"}, {key:"name"}, {key:"price"}, {key:"change"}]
-			},
 			delayTable: {
+				'NYSE': '15min',
+				'BATS': '15min',
 				'CME': '10min',
-				'NYQ': '15mim',
+				'NYQ': '15min',
 				'NMS': '15min',
 				'NYM': '30min',
 				'CBT': '10min',
@@ -27,11 +30,7 @@ YUI({combine: true, timeout: 10000, filter:"debug", logInclude: {example:true}})
 			init : function() {
 				var source = parse_url('source');
 				var _self = this;
-				if (source.toUpperCase() === 'YAHOO') {
-					this.strURL = 'php/ticker.php';
-				} else {
-					this.strURL = 'stubs/ticker_data.json';
-				}
+				this.strURL = 'php/ticker.php';
 				this.loadSymbols();
 				Y.one('.supportDataWrapper a').on('click', function(e) {
 					Y.one('.supportDataWrapper').toggleClass('hidden');
@@ -46,7 +45,7 @@ YUI({combine: true, timeout: 10000, filter:"debug", logInclude: {example:true}})
 					}, 500)
 				})
 			},
-			loadSymbols : function() {
+			loadSymbols : function() { // Get a default list if no quick list is provided
 				var context = this,
 					strURL = 'data/symbols.txt',
 					callback = {
@@ -60,33 +59,16 @@ YUI({combine: true, timeout: 10000, filter:"debug", logInclude: {example:true}})
 					};
 				Y.io(strURL, callback);
 			},
-			createSymbolParamList : function(oString) {
+			createSymbolParamList : function(oString) { // format the default list
 				var oList = oString.split('\n');
 				oList.forEach(function(el, idx, arr) {
 					arr[idx] = el.toUpperCase()
 				})
-				return oList.join('+');
+				return oList.join(',');
 			},
 			loadTickerData : function() {
 				var context = this,
 					initString = '',
-					callback = {
-						timeout: 3000,
-						on : {
-							success : function(x, o){
-								tickerApp.tryCount = 0;
-								tickerApp.buildTicker(o.responseText);
-							},
-							failure : function(x, o){
-								tickerApp.tryCount++;
-								if(tickerApp.tryCount > 5) {
-									alert('Async call failed!');
-								} else {
-									tickerApp.loadTickerData();
-								}
-							}
-						}
-					},
 					quick = Y.one('#quickList').get('value'),
 					posNeg = '',
 					index = -1;
@@ -95,34 +77,42 @@ YUI({combine: true, timeout: 10000, filter:"debug", logInclude: {example:true}})
 					quick.forEach(function(el, idx, arr) {
 						arr[idx] = el.toUpperCase();
 					})
-//					quick = '+' + quick.join('+');
+					quick = quick.join(',').replace(/ /g, '');
 					initString = '';
 				} else {
 					quick = '';
 					initString = this.symbols
 				}
-				Y.io(encodeURI(this.strURL + '?symbols=' + initString + quick), callback);
+				onDemand.getQuote({symbols: initString + quick, fields: fields}, function (err, data) {
+					if (err) {
+						tickerApp.tryCount++;
+						if(tickerApp.tryCount > 5) {
+							alert('Async call failed!');
+						} else {
+							tickerApp.loadTickerData();
+						}
+					} else {
+						tickerApp.tryCount = 0;
+						tickerApp.buildTicker(data.results);						
+					}
+				});
 			},
 			buildTicker : function(oData){
-				var data = Y.JSON.parse(oData.replace(this.rExp, ''));
-				var stocks = Y.DataSchema.JSON.apply(this.schema, data).results;
 				tickerLine = '';
-				var stockCnt = stocks.length;
-				var numBid, numAsk, spread, spreadClass;
+				var stockCnt = oData && oData.length || 0;
+				var numBid, numAsk, spread, spreadClass, stock;
 				for (var i = 0; i < stockCnt; i++) {
-					// YAHOO is sending back a blank/empty line from time to time
-					if (stocks[i]['symbol'] == '') {
-						continue;
-					}
+					console.log(oData[i])
+					stock = oData[i];
 
-					if (stocks[i]['bid'] ==='N/A' || stocks[i]['ask'] === 'N/A') {
+					if (stock.bid === 0 || stock.bid === null || stock.ask === 0 || stock.ask === 0) {
 						spread = '--'
 					} else {
-						numBid = stocks[i]['bid'] * 1;
-						numAsk = stocks[i]['ask'] * 1;
+						numBid = stock.bid * 1;
+						numAsk = stock.ask * 1;
 						spread = (Math.round((Math.abs(numBid - numAsk)) * 1000))/1000
 					}
-					
+
 					if (!isNaN(spread) && spread <= .03) {
 						spreadClass = 'spreadBold';
 					} else if (isNaN(spread)) {
@@ -133,32 +123,55 @@ YUI({combine: true, timeout: 10000, filter:"debug", logInclude: {example:true}})
 					tickerLine += '<span class=' + spreadClass + '>'
 
 					if (document.getElementById('cbxName').checked) {
-						tickerLine += stocks[i]['name'] + ' (';
+						tickerLine += stock.name + ' (';
 					}
-					tickerLine += stocks[i]["symbol"];
+					tickerLine += stock.symbol;
 					if (document.getElementById('cbxName').checked) {
 						tickerLine += ')';
 					}
 					tickerLine += ' ';
+
 					if (document.getElementById('cbxPrice').checked) {
-						tickerLine += stocks[i]['price'] + ' ';
+						tickerLine += stock.lastPrice + ' ';
 					}
 					if (document.getElementById('cbxOpen').checked) {
-						tickerLine += 'Open: ' + stocks[i]['open'] + '&nbsp;&nbsp;&nbsp;'
+						tickerLine += 'Open: ' + stock.open + '&nbsp;&nbsp;&nbsp;'
 					}
+
 					if (document.getElementById('cbxChange').checked) {
-						if ((stocks[i]['change'] + '').indexOf('-') > -1) {
+						if ((stock.netChange + '').indexOf('-') > -1) {
 							tickerLine += '<img src="img/spacer.png" alt="" class="dirArrow down" />';
 							posNeg = 'negative';
-						} else if (stocks[i]['change'] * 1 === 0) {
+						} else if (stock.netChange * 1 === 0) {
 							tickerLine += '<img src="img/spacer.png" alt="" class="dirArrow" />';
 							posNeg = '';
 						} else {
 							tickerLine += '<img src="img/spacer.png" alt="" class="dirArrow up" />';
 							posNeg = 'positive';
 						}
-						tickerLine += '<span class="' + posNeg + '">' + (stocks[i]['change'] + '').replace(/\-|\+/,"") + '</span> ';
+						tickerLine += '<span class="' + posNeg + '">' + (stock.netChange + '').replace(/\-|\+/,"") + '</span> ';
 					}
+
+					if (document.getElementById('cbxBid').checked) {
+						tickerLine += 'Bid: ' + stock.bid + '&nbsp;&nbsp;&nbsp;'
+					}
+					if (document.getElementById('cbxAsk').checked) {
+						tickerLine += 'Ask: ' + stock.ask + '&nbsp;&nbsp;&nbsp;'
+					}
+					if (document.getElementById('cbxSpread').checked) {
+						tickerLine += 'Spread: ' + spread + '&nbsp;&nbsp;&nbsp;'
+					}
+
+					if (document.getElementById('cbxVol').checked) {
+						tickerLine += 'Avg Dly Vol: ' + (stock.avgVolume + '').replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,") + '&nbsp;&nbsp;&nbsp;'
+					}
+					if (document.getElementById('cbxPrevClose').checked) {
+						tickerLine += 'Prev Close: ' + stock.previousClose + '&nbsp;&nbsp;&nbsp;'
+					}
+					if (document.getElementById('cbxDelay').checked) {
+						tickerLine += 'DLY: ' + (this.delayTable[stock.exchange] || 'UNKN') + '&nbsp;&nbsp;&nbsp;'
+					}
+/*
 					if (document.getElementById('cbxBook').checked) {
 						tickerLine += 'BkV: ' + stocks[i]['BkV'] + '&nbsp;&nbsp;&nbsp;';
 						if ((stocks[i]['chg'] + '').indexOf('-') > -1) {
@@ -168,25 +181,7 @@ YUI({combine: true, timeout: 10000, filter:"debug", logInclude: {example:true}})
 						}
 						tickerLine += '(&#916;50 day: <span class="' + posNeg + '">' + stocks[i]['chg'] + '</span>)&nbsp;&nbsp;&nbsp;';
 					}
-					if (document.getElementById('cbxBid').checked) {
-						tickerLine += 'Bid: ' + stocks[i]['bid'] + '&nbsp;&nbsp;&nbsp;'
-					}
-					if (document.getElementById('cbxAsk').checked) {
-						tickerLine += 'Ask: ' + stocks[i]['ask'] + '&nbsp;&nbsp;&nbsp;'
-					}
-					if (document.getElementById('cbxSpread').checked) {
-						tickerLine += 'Spread: ' + spread + '&nbsp;&nbsp;&nbsp;'
-					}
-					if (document.getElementById('cbxVol').checked) {
-						tickerLine += 'Avg Dly Vol: ' + stocks[i]['adv'].replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,") + '&nbsp;&nbsp;&nbsp;'
-					}
-					if (document.getElementById('cbxPrevClose').checked) {
-						tickerLine += 'Prev Close: ' + stocks[i]['prvClose'] + '&nbsp;&nbsp;&nbsp;'
-					}
-					if (document.getElementById('cbxDelay').checked) {
-						tickerLine += 'DLY: ' + (this.delayTable[stocks[i]['exchange']] || 'UNKN') + '&nbsp;&nbsp;&nbsp;'
-					}
-
+ */
 					tickerLine += '</span>'
 
 				}
@@ -198,7 +193,6 @@ YUI({combine: true, timeout: 10000, filter:"debug", logInclude: {example:true}})
 				scrollStart = parseInt(region.right)-parseInt(region.left);
 				var tickerText = '<div class="tickerLine" style="left: ' + scrollStart + 'px;">' + tickerLine + '</div>';
 				ticker.set('innerHTML',ticker.get('innerHTML')+tickerText);
-				Y.one('#identity').set('innerHTML', data['source']);
 				
 			},
 			scrollTicker : function() {
@@ -271,4 +265,3 @@ function parse_url( name ) {
 		return results[1];
 	}
 }
-
