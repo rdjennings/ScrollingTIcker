@@ -1,0 +1,73 @@
+html, body {
+	background: #000;
+	color: #fff;
+	height: 100%;
+	width: 100%;
+}
+
+.dirArrow {
+	height: 14px;
+	position: relative;
+	width: 14px;
+}
+
+.dirArrow.up {
+	background: transparent url('./assets/images/Raise-small.png') no-repeat 0 0;
+	top: 1px;
+}
+
+.dirArrow.down {
+	background: transparent url(./assets/images/Fall-small.png) no-repeat 0 0;
+	top: 5px;
+}
+
+.footNote {
+	font-size: .85em;
+	font-style: italic;
+	margin-left: 2em;;
+}
+
+.negative {
+	color: #f00;
+}
+.spreadBold {
+	opacity: 1;
+}
+
+.spreadGold {
+	color: #FFD700;
+}
+
+.spreadDim {
+	opacity: .5;
+}
+
+/* config form */
+.configForm {
+  justify-content: center;
+  display: flex;
+  margin-block-start: 3em;
+}
+
+.configList {
+  list-style: none;
+  margin-block-start: 0;
+  padding-inline-start: 20px;
+}
+
+.showHideLabel {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+
+/* config form end */
+
+.tickerBlocks {
+  background-color: #000;
+	color: #0f0;
+  display: flex;
+  gap: 2em;
+  grid-template-columns: auto auto auto;
+  padding: 1em 2em;
+}
